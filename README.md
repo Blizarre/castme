@@ -2,6 +2,9 @@
 
 CastMe is a simple Python script that allows you to cast music from a Subsonic server to a Chromecast device.
 
+It's pretty bare-bone for now, but as I am using it more and more I will add the features that I need.
+The first step will be to be add a config file for the secrets, and then I will add more options than just album search.
+
 ### Installation
 - Clone the repository
 - Install the required dependencies using Poetry or the install target:
@@ -25,3 +28,5 @@ Chromecast ready
 Playing Song(title='Get the Party Started', album_name='Greatest Hits… So Far!!!', artist='P!nk', url='
 ...
 ```
+
+NOTE: `--chromecast-label` can be used to override the default chromecast name
