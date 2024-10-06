@@ -131,7 +131,7 @@ def get_songs_for_album(album_name: str) -> List[Song]:
 
 
 def play_on_chromecast(song: Song, controller: MediaController):
-    print("Playing", song)
+    print("Playing song", song)
     metadata = dict(
         # 3 is the magic number for MusicTrackMediaMetadata
         metadataType=3,
