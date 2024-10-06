@@ -58,11 +58,10 @@ class MyChromecastListener(MediaStatusListener):
         print("BOOH", item, error_code)
 
 
-def find_chromecast() -> Chromecast:
-    friendly_chromecast_label = "Living Room TV"
-    chromecasts, _ = get_listed_chromecasts(friendly_names=[friendly_chromecast_label])
+def find_chromecast(label) -> Chromecast:
+    chromecasts, _ = get_listed_chromecasts(friendly_names=[label])
     if not chromecasts:
-        raise ChromecastNotFoundException(friendly_chromecast_label)
+        raise ChromecastNotFoundException(label)
 
     return chromecasts[0]
 
@@ -152,14 +151,16 @@ def play_on_chromecast(song: Song, controller: MediaController):
 def main():
     parser = argparse.ArgumentParser("CastMe")
     parser.add_argument("album")
+    parser.add_argument("--chromecast-label", default="Living Room TV")
     args = parser.parse_args()
     candidate_album_name = args.album
+    chromecast_label = args.chromecast_label
 
     songs = get_songs_for_album(candidate_album_name)
     print(f"{len(songs)} to play")
 
     print("Finding chromecast")
-    cast = find_chromecast()
+    cast = find_chromecast(chromecast_label)
 
     print("Waiting for cast to be ready")
     cast.wait()
