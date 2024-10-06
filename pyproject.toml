@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "castme"
+version = "0.9"
+authors = ["Your Name <your.email@example.com>"]
+description = "Cast any media file"
+
+[tool.poetry.scripts]
+castme = "castme.main:main"
+
+
+[tool.poetry.dependencies]
+pychromecast = "*"
+zeroconf = "*"
+python = ">=3.10,<4.0"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+ruff = "*"
+isort = "*"
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+ignore = ["E501"]
