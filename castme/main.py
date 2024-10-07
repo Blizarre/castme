@@ -1,5 +1,6 @@
 import argparse
 import cmd
+from shutil import get_terminal_size
 from typing import List
 
 from pychromecast import Chromecast
@@ -15,7 +16,6 @@ SUBSONIC_APP_ID = "castme"
 
 class CastMeCli(cmd.Cmd):
     prompt = ">> "  # Change the prompt text
-    intro = "CastMe"
 
     def __init__(self, subsonic: SubSonic, chromecast: Chromecast, songs: List[Song]):
         super().__init__()
@@ -31,11 +31,12 @@ class CastMeCli(cmd.Cmd):
 
     def do_list(self, _line):
         """List all the albums available"""
-        for album in self.subsonic.get_all_albums():
-            print(album)
+        cols, _lines = get_terminal_size()
+        print(cols)
+        self.columnize(self.subsonic.get_all_albums(), displaywidth=cols)
 
-    def default(self, line: str):
-        print("Unknown command", line)
+    def emptyline(self):
+        pass
 
     def do_play(self, line: str):
         """play an album. The argument to that command will be matched against all
@@ -77,6 +78,9 @@ class CastMeCli(cmd.Cmd):
         self.chromecast.quit_app()
         self.chromecast.disconnect()
         return True
+
+    def do_EOF(self, line: str):
+        return self.do_quit(line)
 
 
 def main():
