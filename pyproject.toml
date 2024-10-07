@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "castme"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Simon Marache-Francisco <pypi@simon.marache.net>"]
 description = "REPL to stream music from a Subsonic server to a chromecast"
 

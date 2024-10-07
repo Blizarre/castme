@@ -66,12 +66,20 @@ class SubSonic:
         ]
         albums = output["albumList"]["album"]
         songs = []
-        closest = difflib.get_close_matches(album_name, [a["album"] for a in albums], 1)
+        closest = difflib.get_close_matches(
+            album_name,
+            # This truncation is a hack, but get_close_matches doesn't handle very
+            # dissimilar string length well. We essentially assume that the user
+            # was lazy and just typed the beginning of the album name, which works
+            # actually really well. It is a good enough heuristic for now.
+            [a["album"][: len(album_name) + 3] for a in albums],
+            1,
+        )
         if not closest:
             raise AlbumNotFoundException(album_name)
 
         for album in albums:
-            if album["album"] == closest[0]:
+            if album["album"][: len(album_name) + 3] == closest[0]:
                 cover_url, cover_params = self.make_sonic_url(
                     "getCoverArt", id=album["coverArt"]
                 )
@@ -91,4 +99,7 @@ class SubSonic:
                             cover_url + "?" + urlencode(cover_params),
                         )
                     )
-        return songs
+                return songs
+
+        if not songs:
+            raise AlbumNotFoundException(album_name)
