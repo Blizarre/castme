@@ -46,7 +46,7 @@ class SubSonic:
             "s": salt,
         }
 
-        return f"https://m.l.marache.net/rest/{verb}", parameters
+        return f"{self.server_prefix}/rest/{verb}", parameters
 
     def call_sonic(self, verb: str, **kwargs):
         url, parameters = self.make_sonic_url(verb, **kwargs)
