@@ -27,7 +27,7 @@ class CastMeCli(cmd.Cmd):
     def do_queue(self, _line):
         """Print the play queue"""
         for idx, s in enumerate(self.songs):
-            print(f"{idx:2} {s}")
+            print(f"{1 + idx:2} {s}")
 
     def do_list(self, _line):
         """List all the albums available"""
