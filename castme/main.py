@@ -11,6 +11,16 @@ from castme.config import Config
 from castme.song import Song
 from castme.subsonic import AlbumNotFoundException, SubSonic
 
+from importlib.metadata import PackageNotFoundError, version
+
+
+def castme_version():
+    try:
+        return version("castme")
+    except PackageNotFoundError:
+        return "unknown"
+
+
 SUBSONIC_APP_ID = "castme"
 
 
@@ -85,15 +95,21 @@ class CastMeCli(cmd.Cmd):
 
 def main():
     parser = argparse.ArgumentParser("CastMe")
-    parser.add_argument("--config")
+    parser.add_argument("--config", help="Set the configuration file to use")
+    parser.add_argument("--version", action="store_true", help="Print version and exit")
     args = parser.parse_args()
     config_path = args.config
-    songs = []
+
+    if args.version:
+        print("Version: ", castme_version())
+        return
 
     config = Config.load(config_path)
     subsonic = SubSonic(
         SUBSONIC_APP_ID, config.user, config.password, config.subsonic_server
     )
+
+    songs = []
 
     print("Finding chromecast")
     cast = find_chromecast(config.chromecast_friendly_name)
@@ -107,3 +123,7 @@ def main():
 
     cli = CastMeCli(subsonic, cast, songs)
     cli.cmdloop()
+
+
+if __name__ == "__main__":
+    main()
