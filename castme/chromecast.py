@@ -45,6 +45,7 @@ def play_on_chromecast(song: Song, controller: MediaController):
     print("Playing song", song)
     metadata = dict(
         # 3 is the magic number for MusicTrackMediaMetadata
+        # see https://developers.google.com/cast/docs/media/messages
         metadataType=3,
         albumName=song.album_name,
         title=song.title,
