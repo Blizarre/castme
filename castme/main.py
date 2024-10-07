@@ -31,7 +31,8 @@ class MyChromecastListener(MediaStatusListener):
 
     def new_media_status(self, status: MediaStatus):
         if status.player_is_idle and status.idle_reason == "FINISHED":
-            play_on_chromecast(self.songs.pop(0), self.media_controller)
+            if self.songs:
+                play_on_chromecast(self.songs.pop(0), self.media_controller)
 
     def load_media_failed(self, item: int, error_code: int):
         """Called when load media failed."""
