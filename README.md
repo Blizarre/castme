@@ -1,9 +1,10 @@
 # CastMe
 
-CastMe is a simple Python script that allows you to cast music from a Subsonic server to a Chromecast device.
+CastMe is a simple Python REPL that allows you to cast music from a Subsonic server to a Chromecast device.
+
+**NOTE: The subsonic server must expose a URL over HTTPS. And since the chromecast will be the one connecting to the server, the certificate need to be trusted.**
 
 It's pretty bare-bone for now, but as I am using it more and more I will add the features that I need.
-The first step will be to be add a config file for the secrets, and then I will add more options than just album search.
 
 ### Installation
 - Clone the repository
@@ -12,21 +13,29 @@ The first step will be to be add a config file for the secrets, and then I will 
 ```bash
 make install
 ```
+- Copy the config file template "castme.toml.template" to one of the supported directory and update the values inside
+  - "castme.toml"
+  - "~/.config/castme.toml"
+  - "/etc/castme.toml"
+
 
 ### Usage
-- Run the script with the desired album name as an argument
-- The script will find the closest match for the album name on the Subsonic server
-- It will then play the songs from the album on the selected Chromecast device
+- Run the script, a REPL will appear:
 
-```bash
-poetry run castme "Greatest hist... so far"
-Closest match for Greatest hist... so far is Greatest Hits… So Far!!!
-19 to play
+```
+> poetry run castme
+Loading config from /home/blizarre/.config/castme.toml
 Finding chromecast
 Waiting for cast to be ready
 Chromecast ready
-Playing Song(title='Get the Party Started', album_name='Greatest Hits… So Far!!!', artist='P!nk', url='
-...
+CastMe
+>> play Harold enItal
+Playing song Harold in the mountains (Adagio - Allegro) / Harold en Italie by Hector Berlioz
+>> queue
+ 0 The Pilgrim's Procession (Allegretto) / Harold en Italie by Hector Berlioz
+ 1 Serenade of an Abruzzian highlander (Allegro assai) / Harold en Italie by Hector Berlioz
+ 2 The Robbers' orgies (Allegro frenetico) / Harold en Italie by Hector Berlioz
+>> playpause
+>> playpause
+>> quit
 ```
-
-NOTE: `--chromecast-label` can be used to override the default chromecast name

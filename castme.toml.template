@@ -1,4 +1,8 @@
 user = "USER"
 password = "PASWORD"
+# It HAS to be a HTTPS server, as the chromecast refuse to play from non-secure URL
+# For locally hosted subsonic servers, you will need a SSL cert. Some pointers:
+# - https://github.com/caddy-dns/acmedns
+# - https://github.com/joohoi/acme-dns
 subsonic_server = "https://SERVER"
 chromecast_friendly_name = "MY_CHROMECAST"
