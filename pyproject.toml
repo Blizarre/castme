@@ -38,5 +38,5 @@ profile = "black"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "B"]
+select = ["E", "F", "B", "PL", "TRY", "RUF", "FURB"]
 ignore = ["E501"]
