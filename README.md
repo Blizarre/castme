@@ -40,3 +40,5 @@ Playing song Harold in the mountains (Adagio - Allegro) / Harold en Italie by He
 >> playpause
 >> quit
 ```
+
+commands: `help  list  next  play  playpause  queue  quit  volume`

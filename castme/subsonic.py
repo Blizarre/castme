@@ -54,6 +54,12 @@ class SubSonic:
         req.raise_for_status()
         return req.json()
 
+    def get_all_albums(self) -> List[str]:
+        albums = self.call_sonic("getAlbumList", type="alphabeticalByName", size=500)[
+            "subsonic-response"
+        ]["albumList"]["album"]
+        return [a["album"] for a in albums]
+
     def get_songs_for_album(self, album_name: str) -> List[Song]:
         output = self.call_sonic("getAlbumList", type="alphabeticalByName", size=500)[
             "subsonic-response"
