@@ -111,10 +111,8 @@ def main():
 
     songs = []
 
-    print("Finding chromecast")
+    print("looking for chromecast", config.chromecast_friendly_name)
     cast = find_chromecast(config.chromecast_friendly_name)
-
-    print("Waiting for cast to be ready")
     cast.wait()
     print("Chromecast ready")
 
