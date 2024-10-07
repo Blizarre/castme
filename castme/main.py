@@ -94,6 +94,9 @@ class CastMeCli(cmd.Cmd):
         else:
             self.mediacontroller.pause()
 
+    def do_next(self, _line):
+        play_on_chromecast(self.songs.pop(0), self.mediacontroller)
+
     def do_quit(self, _line):
         return True
 
