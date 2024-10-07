@@ -2,7 +2,7 @@
 
 CastMe is a simple Python REPL that allows you to cast music from a Subsonic server to a Chromecast device.
 
-**NOTE: The subsonic server must expose a URL over HTTPS. And since the chromecast will be the one connecting to the server, the certificate need to be trusted.**
+**NOTE: The subsonic server must expose a URL over HTTPS. And since the chromecast will be the one connecting to the server, the certificate need to be trusted. This project is tested against [Navidrome](https://www.navidrome.org/) only.**
 
 It's pretty bare-bone for now, but as I am using it more and more I will add the features that I need.
 

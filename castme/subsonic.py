@@ -22,6 +22,10 @@ SUBSONIC_SUPPORTED_VERSION = "1.16.1"
 
 
 class SubSonic:
+    """API client implementation based on the official documentation:
+    https://www.subsonic.org/pages/api.jsp
+    """
+
     def __init__(
         self, app_id: str, user: str, password: str, server_prefix: str
     ) -> None:
