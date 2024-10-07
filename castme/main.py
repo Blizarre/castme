@@ -1,7 +1,11 @@
 import argparse
 import cmd
+import os
+import shutil
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from shutil import get_terminal_size
+from sys import exit
 from typing import List
 
 from pychromecast import Chromecast
@@ -109,6 +113,11 @@ class CastMeCli(cmd.Cmd):
 def main():
     parser = argparse.ArgumentParser("CastMe")
     parser.add_argument("--config", help="Set the configuration file to use")
+    parser.add_argument(
+        "--init",
+        help="create an empty configuration file in ~/.config . You can override its location with --config",
+        action="store_true",
+    )
     parser.add_argument("--version", action="store_true", help="Print version and exit")
     args = parser.parse_args()
     config_path = args.config
@@ -117,12 +126,25 @@ def main():
         print("Version: ", castme_version())
         return
 
+    if args.init:
+        config_path = os.path.expanduser(args.config or "~/.config/castme.toml")
+        if os.path.exists(config_path):
+            print(f"The configuration file {config_path} already exist, bailing out...")
+            exit(1)
+        shutil.copy(
+            Path(os.path.dirname(__file__), "assets/castme.toml.template"), config_path
+        )
+        print(
+            f"Configuration initialized in {config_path}, please edit it before starting castme again"
+        )
+        exit(0)
+
     config = Config.load(config_path)
     subsonic = SubSonic(
         SUBSONIC_APP_ID, config.user, config.password, config.subsonic_server
     )
 
-    songs = []
+    songs_queue = []
 
     print("looking for chromecast", config.chromecast_friendly_name)
     cast = find_chromecast(config.chromecast_friendly_name)
@@ -130,9 +152,9 @@ def main():
     print("Chromecast ready")
 
     mc: MediaController = cast.media_controller
-    mc.register_status_listener(MyChromecastListener(songs, mc))
+    mc.register_status_listener(MyChromecastListener(songs_queue, mc))
 
-    cli = CastMeCli(subsonic, cast, songs)
+    cli = CastMeCli(subsonic, cast, songs_queue)
     cli.cmdloop()
 
 

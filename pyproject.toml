@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "castme"
-version = "0.1.5"
+version = "0.2.0"
 authors = ["Simon Marache-Francisco <pypi@simon.marache.net>"]
 description = "REPL to stream music from a Subsonic server to a chromecast"
 
 license = "GPL-3.0-only"
 readme = "README.md"
+include = ["castme/assets/castme.toml.template"]
 
 repository = "https://github.com/Blizarre/castme"
 
