@@ -1,0 +1,4 @@
+user = "USER"
+password = "PASWORD"
+subsonic_server = "https://SERVER"
+chromecast_friendly_name = "MY_CHROMECAST"
