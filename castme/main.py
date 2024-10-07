@@ -73,6 +73,9 @@ class CastMeCli(cmd.Cmd):
             self.chromecast.set_volume(value)
 
     def do_quit(self, _line):
+        """Exit the application"""
+        self.chromecast.quit_app()
+        self.chromecast.disconnect()
         return True
 
 
