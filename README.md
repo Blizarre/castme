@@ -22,13 +22,14 @@ make install
 ### Usage
 - Run the script, a REPL will appear:
 
-```
+```bash
 > poetry run castme
 Loading config from /home/blizarre/.config/castme.toml
 Finding chromecast
 Waiting for cast to be ready
 Chromecast ready
 CastMe
+
 >> play Harold enItal
 Playing song Harold in the mountains (Adagio - Allegro) / Harold en Italie by Hector Berlioz
 >> queue
