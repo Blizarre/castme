@@ -57,4 +57,4 @@ make install
   - "~/.config/castme.toml"
   - "/etc/castme.toml"
 
-During development, `make lint` will run the formatters and linters for the project.
+During development, `make dev` will run the formatters and linters for the project.
