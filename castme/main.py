@@ -78,7 +78,12 @@ class CastMeCli(cmd.Cmd):
         -VALUE: Decrease the volume by VALUE
         VALUE: Set the volume to VALUE
         """
-        value = float(line) / 100.0
+        try:
+            value = float(line) / 100.0
+        except ValueError:
+            print("Error converting the value into a number")
+            return
+
         if line.startswith("+"):
             self.chromecast.volume_up(value)
         elif line.startswith("-"):
