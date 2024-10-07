@@ -1,5 +1,6 @@
 import argparse
 import cmd
+from importlib.metadata import PackageNotFoundError, version
 from shutil import get_terminal_size
 from typing import List
 
@@ -10,8 +11,6 @@ from castme.chromecast import MyChromecastListener, find_chromecast, play_on_chr
 from castme.config import Config
 from castme.song import Song
 from castme.subsonic import AlbumNotFoundException, SubSonic
-
-from importlib.metadata import PackageNotFoundError, version
 
 
 def castme_version():
@@ -35,12 +34,12 @@ class CastMeCli(cmd.Cmd):
         self.mediacontroller = chromecast.media_controller
 
     def do_queue(self, _line):
-        """Print the play queue"""
+        """Print the play queue (alias: q)"""
         for idx, s in enumerate(self.songs):
             print(f"{1 + idx:2} {s}")
 
     def do_list(self, _line):
-        """List all the albums available"""
+        """List all the albums available (alias: l)"""
         cols, _lines = get_terminal_size()
         print(cols)
         self.columnize(self.subsonic.get_all_albums(), displaywidth=cols)
@@ -50,7 +49,7 @@ class CastMeCli(cmd.Cmd):
 
     def do_play(self, line: str):
         """play an album. The argument to that command will be matched against all
-        albums on the device and the best matching one will be played/"""
+        albums on the device and the best matching one will be played (alias: p)"""
         self.songs.clear()
         try:
             self.songs.extend(self.subsonic.get_songs_for_album(line))
@@ -59,18 +58,18 @@ class CastMeCli(cmd.Cmd):
             print(e)
 
     def do_playpause(self, _line):
-        """play/pause the song"""
+        """play/pause the song (alias: pp)"""
         if self.mediacontroller.is_paused:
             self.mediacontroller.play()
         else:
             self.mediacontroller.pause()
 
     def do_next(self, _line):
-        """Skip to the next song"""
+        """Skip to the next song (alias: s)"""
         play_on_chromecast(self.songs.pop(0), self.mediacontroller)
 
     def do_volume(self, line: str):
-        """Set or change the volume. Valid values are between 0 and 100.
+        """Set or change the volume. Valid values are between 0 and 100 (alias: v)
         +VALUE: Increase the volume by VALUE
         -VALUE: Decrease the volume by VALUE
         VALUE: Set the volume to VALUE
@@ -84,13 +83,27 @@ class CastMeCli(cmd.Cmd):
             self.chromecast.set_volume(value)
 
     def do_quit(self, _line):
-        """Exit the application"""
+        """Exit the application (alias: x or Ctrl-D)"""
         self.chromecast.quit_app()
         self.chromecast.disconnect()
         return True
 
-    def do_EOF(self, line: str):
-        return self.do_quit(line)
+    def precmd(self, line: str) -> str:
+        potential_alias = line.split(" ")[0]
+        aliases = {
+            "p": "play",
+            "v": "volume",
+            "pp": "playpause",
+            "n": "next",
+            "l": "list",
+            "q": "queue",
+            "x": "quit",
+            "EOF": "quit",  # Set by Cmd itself on Ctrl-C
+        }
+        if potential_alias in aliases:
+            return line.replace(potential_alias, aliases[potential_alias], 1)
+        else:
+            return line
 
 
 def main():
