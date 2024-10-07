@@ -4,9 +4,22 @@ version = "0.1.0"
 authors = ["Simon Marache-Francisco <pypi@simon.marache.net>"]
 description = "REPL to stream music from a Subsonic server to a chromecast"
 
+license = "GPL-3.0-only"
+readme = "README.md"
+
+repository = "https://github.com/Blizarre/castme"
+
+keywords = ["subsonic", "chromecast"]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/Blizarre/castme/issues"
+
 [tool.poetry.scripts]
 castme = "castme.main:main"
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 pychromecast = "*"
