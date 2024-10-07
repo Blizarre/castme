@@ -1,8 +1,8 @@
 .PHONY: lint env
 
 lint:
-	poetry run isort -c .
-	poetry run black -c .
+	poetry run isort --check .
+	poetry run black --check .
 	poetry run ruff check .
 
 dev:
