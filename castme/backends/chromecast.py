@@ -7,7 +7,44 @@ from pychromecast.controllers.media import (
     MediaStatusListener,
 )
 
+from castme.config import Config
+from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
+
+
+class ChromecastBackend(Backend):
+    def __init__(self, config: Config, songs: List[Song]):
+        self.chromecast = find_chromecast(config.chromecast_friendly_name)
+        self.songs = songs
+        self.mediacontroller = self.chromecast.media_controller
+        self.chromecast.wait()
+        self.mediacontroller.register_status_listener(
+            MyChromecastListener(songs, self.mediacontroller)
+        )
+
+    def play_next(self):
+        if self.songs:
+            play_on_chromecast(self.songs.pop(0), self.mediacontroller)
+        else:
+            raise NoSongsToPlayException()
+
+    def playpause(self):
+        if self.mediacontroller.status.player_is_playing:
+            self.mediacontroller.pause()
+        else:
+            self.mediacontroller.play()
+
+    def volume_set(self, value):
+        self.chromecast.set_volume(value)
+
+    def volume_delta(self, value):
+        if value > 0:
+            self.chromecast.volume_up(value)
+        else:
+            self.chromecast.volume_down(-value)
+
+    def stop(self):
+        self.chromecast.quit_app()
 
 
 class ChromecastNotFoundException(BaseException):

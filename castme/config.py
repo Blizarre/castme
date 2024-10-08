@@ -15,6 +15,7 @@ class Config:
     password: str
     subsonic_server: str
     chromecast_friendly_name: str
+    default_backend: str
 
     @classmethod
     def load(cls, file_path: Optional[PurePath | str] = None) -> "Config":

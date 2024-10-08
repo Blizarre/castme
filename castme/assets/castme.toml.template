@@ -6,3 +6,4 @@ password = "PASWORD"
 # - https://github.com/joohoi/acme-dns
 subsonic_server = "https://SERVER"
 chromecast_friendly_name = "MY_CHROMECAST"
+default_backend = "chromecast"
