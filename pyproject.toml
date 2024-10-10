@@ -27,6 +27,8 @@ pychromecast = "*"
 zeroconf = "*"
 python = ">=3.10,<4.0"
 pygame = "^2.6.1"
+types-requests = "^2.32.0.20240914"
+mypy = "^1.11.2"
 
 [tool.poetry.dev-dependencies]
 black = "*"

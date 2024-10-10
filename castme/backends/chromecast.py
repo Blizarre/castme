@@ -1,7 +1,7 @@
 from typing import List
 
-from pychromecast import Chromecast, get_listed_chromecasts
-from pychromecast.controllers.media import (
+from pychromecast import Chromecast, get_listed_chromecasts  # type: ignore
+from pychromecast.controllers.media import (  # type: ignore
     MediaController,
     MediaStatus,
     MediaStatusListener,
