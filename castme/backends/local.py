@@ -1,4 +1,4 @@
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stdout
 from dataclasses import dataclass
 from enum import Enum
 from io import BytesIO
@@ -7,16 +7,21 @@ from threading import Thread
 from typing import Any, BinaryIO, Generator, List
 
 import requests as r
-from pygame import event, locals
-from pygame.display import init as display_init
-from pygame.mixer import Channel, Sound
-from pygame.mixer import init as mixer_init
+
+# Feeling bad about it, but pygame always display a welcome
+# message which is completely out of place on a CLI music player.
+with redirect_stdout(None):
+    from pygame import event
+    from pygame.locals import USEREVENT
+    from pygame.display import init as display_init
+    from pygame.mixer import Channel, Sound
+    from pygame.mixer import init as mixer_init
 
 from castme.config import Config
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 
-STOP_EVENT = locals.USEREVENT + 1
+STOP_EVENT = USEREVENT + 1
 
 
 def get_song(song: Song) -> BinaryIO:

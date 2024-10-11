@@ -36,8 +36,6 @@ SUBSONIC_APP_ID = "castme"
 
 
 class CastMeCli(cmd.Cmd):
-    prompt = ">> "  # Change the prompt text
-
     def __init__(
         self,
         subsonic: SubSonic,
@@ -54,6 +52,10 @@ class CastMeCli(cmd.Cmd):
 
         self.current_target = targets[default_backend]
         message(f"Currently playing on {default_backend}")
+        self.update_prompt(default_backend)
+
+    def update_prompt(self, label):
+        self.prompt = f"[{label}] >> "
 
     def do_list(self, _line):
         """List all the albums available (alias: l)"""
@@ -76,7 +78,7 @@ class CastMeCli(cmd.Cmd):
             if self.songs:
                 self.current_target.force_play()
 
-            message(f"Switch done to {line}")
+            self.update_prompt(line)
         else:
             error(f"Could not find target {line}")
 
