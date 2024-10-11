@@ -60,7 +60,7 @@ class SubSonic:
         ]["albumList"]["album"]
         return [a["album"] for a in albums]
 
-    def get_songs_for_album(self, album_name: str) -> List[Song]:
+    def get_songs_for_album(self, album_name: str) -> Tuple[str, List[Song]]:
         output = self.call_sonic("getAlbumList", type="alphabeticalByName", size=500)[
             "subsonic-response"
         ]
@@ -99,7 +99,6 @@ class SubSonic:
                             cover_url + "?" + urlencode(cover_params),
                         )
                     )
-                return songs
+                return album["album"], songs
 
-        if not songs:
-            raise AlbumNotFoundException(album_name)
+        raise AlbumNotFoundException(album_name)

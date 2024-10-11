@@ -8,8 +8,8 @@ from shutil import get_terminal_size
 from sys import exit as sys_exit
 from typing import Dict, List
 
-from castme.backends.chromecast import ChromecastBackend
-from castme.backends.local import LocalBackend
+from castme.backends.chromecast import backend as chromecast_backend
+from castme.backends.local import backend as local_backend
 from castme.config import Config
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
@@ -54,11 +54,6 @@ class CastMeCli(cmd.Cmd):
         self.current_target = targets[default_backend]
         print("Currently playing on", default_backend)
 
-    def do_queue(self, _line):
-        """Print the play queue (alias: q)"""
-        for idx, s in enumerate(self.songs):
-            print(f"{1 + idx:2} {s}")
-
     def do_list(self, _line):
         """List all the albums available (alias: l)"""
         cols, _lines = get_terminal_size()
@@ -69,6 +64,8 @@ class CastMeCli(cmd.Cmd):
         pass
 
     def do_switch(self, line):
+        """Switch to another backend. Without argument list the available
+        backends. (alias: s)"""
         if not line:
             print(f"Available targets: {", ".join(self.targets.keys())}")
             return
@@ -77,31 +74,44 @@ class CastMeCli(cmd.Cmd):
         if line in self.targets:
             self.current_target = self.targets[line]
             if self.songs:
-                self.current_target.play_next()
+                self.current_target.force_play()
 
             print(f"Switch done to {line}")
         else:
             print(f"Could not find target {line}")
 
-    def do_play(self, line: str):
-        """play an album. The argument to that command will be matched against all
-        albums on the device and the best matching one will be played (alias: p)"""
+    def do_clear(self, line: str):
+        """Clear the queue and stop the music (alias: c)"""
         self.songs.clear()
+        self.current_target.stop()
+
+    def do_queue(self, line: str):
+        """Queue an album. The argument to that command will be matched against all
+        albums on the device and the best matching one will be played (alias: q).
+        """
+        if not line:
+            for idx, s in enumerate(self.songs):
+                print(f"{1 + idx:2} {s}")
+            return
         try:
-            self.songs.extend(self.subsonic.get_songs_for_album(line))
-            self.current_target.play_next()
+            name, songs = self.subsonic.get_songs_for_album(line)
+            print("Queueing", name)
+            self.songs.extend(songs)
         except AlbumNotFoundException as e:
             print(e)
-        except NoSongsToPlayException:
-            print("No songs can be played")
 
     def do_playpause(self, _line):
         """play/pause the song (alias: pp)"""
         self.current_target.playpause()
 
     def do_next(self, _line):
-        """Skip to the next song (alias: s)"""
-        self.current_target.play_next()
+        """Skip to the next song (alias: n)"""
+        if self.songs:
+            self.songs.pop(0)
+        try:
+            self.current_target.force_play()
+        except NoSongsToPlayException:
+            print("No songs in the queue")
 
     def do_volume(self, line: str):
         """Set or change the volume. Valid values are between 0 and 100 (alias: v)
@@ -128,13 +138,14 @@ class CastMeCli(cmd.Cmd):
     def precmd(self, line: str) -> str:
         potential_alias = line.split(" ")[0]
         aliases = {
-            "p": "play",
-            "v": "volume",
             "pp": "playpause",
-            "n": "next",
             "l": "list",
+            "n": "next",
             "q": "queue",
+            "v": "volume",
+            "c": "clear",
             "x": "quit",
+            "s": "switch",
             "EOF": "quit",  # Set by Cmd itself on Ctrl-C
         }
         if potential_alias in aliases:
@@ -152,6 +163,7 @@ def main():
         action="store_true",
     )
     parser.add_argument("--version", action="store_true", help="Print version and exit")
+    parser.add_argument("backend", nargs="?")
     args = parser.parse_args()
     config_path = args.config
 
@@ -179,19 +191,18 @@ def main():
 
     songs_queue = []
 
-    print("looking for chromecast", config.chromecast_friendly_name)
-    chromecastplayer = ChromecastBackend(config, songs_queue)
-    print("Chromecast ready")
+    with (
+        chromecast_backend(config, songs_queue) as chromecast,
+        local_backend(config, songs_queue) as local,
+    ):
 
-    localplayer = LocalBackend(songs_queue)
-
-    cli = CastMeCli(
-        subsonic,
-        {"chromecast": chromecastplayer, "local": localplayer},
-        config.default_backend,
-        songs_queue,
-    )
-    cli.cmdloop()
+        cli = CastMeCli(
+            subsonic,
+            {"chromecast": chromecast, "local": local},
+            args.backend or config.default_backend,
+            songs_queue,
+        )
+        cli.cmdloop()
 
 
 if __name__ == "__main__":

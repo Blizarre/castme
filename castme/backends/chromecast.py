@@ -1,4 +1,5 @@
-from typing import List
+from contextlib import contextmanager
+from typing import Generator, List
 
 from pychromecast import Chromecast, get_listed_chromecasts  # type: ignore
 from pychromecast.controllers.media import (  # type: ignore
@@ -14,25 +15,28 @@ from castme.song import Song
 
 class ChromecastBackend(Backend):
     def __init__(self, config: Config, songs: List[Song]):
-        self.chromecast = find_chromecast(config.chromecast_friendly_name)
+        self.chromecast_friendly_name = config.chromecast_friendly_name
         self.songs = songs
+        self.chromecast = find_chromecast(self.chromecast_friendly_name)
         self.mediacontroller = self.chromecast.media_controller
         self.chromecast.wait()
         self.mediacontroller.register_status_listener(
             MyChromecastListener(songs, self.mediacontroller)
         )
 
-    def play_next(self):
+    def force_play(self):
         if self.songs:
-            play_on_chromecast(self.songs.pop(0), self.mediacontroller)
+            play_on_chromecast(self.songs[0], self.mediacontroller)
         else:
             raise NoSongsToPlayException()
 
     def playpause(self):
-        if self.mediacontroller.status.player_is_playing:
-            self.mediacontroller.pause()
-        else:
+        if self.mediacontroller.status.player_is_paused:
             self.mediacontroller.play()
+        elif self.mediacontroller.status.player_is_idle:
+            self.force_play()
+        elif self.mediacontroller.status.player_is_playing:
+            self.mediacontroller.pause()
 
     def volume_set(self, value):
         self.chromecast.set_volume(value)
@@ -44,7 +48,10 @@ class ChromecastBackend(Backend):
             self.chromecast.volume_down(-value)
 
     def stop(self):
-        self.chromecast.quit_app()
+        self.chromecast.disconnect()
+
+    def close(self):
+        self.stop()
 
 
 class ChromecastNotFoundException(BaseException):
@@ -63,11 +70,13 @@ class MyChromecastListener(MediaStatusListener):
     def new_media_status(self, status: MediaStatus):
         if status.player_is_idle and status.idle_reason == "FINISHED":
             if self.songs:
-                play_on_chromecast(self.songs.pop(0), self.media_controller)
+                self.songs.pop(0)
+            if self.songs:
+                play_on_chromecast(self.songs[0], self.media_controller)
 
     def load_media_failed(self, item: int, error_code: int):
         """Called when load media failed."""
-        print("BOOH", item, error_code)
+        print("Error loading media", item, error_code)
 
 
 def find_chromecast(label) -> Chromecast:
@@ -95,3 +104,12 @@ def play_on_chromecast(song: Song, controller: MediaController):
         media_info=metadata,
         thumb=song.album_art,
     )
+
+
+@contextmanager
+def backend(config: Config, songs: List[Song]) -> Generator[Backend, None, None]:
+    chromecast = ChromecastBackend(config, songs)
+    try:
+        yield chromecast
+    finally:
+        chromecast.close()

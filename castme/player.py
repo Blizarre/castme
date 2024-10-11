@@ -7,7 +7,7 @@ class NoSongsToPlayException(BaseException):
 
 class Backend:
     @abstractmethod
-    def play_next(self):
+    def force_play(self):
         pass
 
     @abstractmethod
@@ -19,8 +19,8 @@ class Backend:
         """Set volume, between 0 and 1.0"""
 
     @abstractmethod
-    def volume_delta(self, value):
-        pass
+    def volume_delta(self, value: float):
+        """add value to the volume, between 0 and 1.0"""
 
     @abstractmethod
     def stop(self):
