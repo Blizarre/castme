@@ -11,6 +11,7 @@ from typing import Dict, List
 from castme.backends.chromecast import backend as chromecast_backend
 from castme.backends.local import backend as local_backend
 from castme.config import Config
+from castme.messages import debug_mode_enabled, enable_debug_mode, error, message
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 from castme.subsonic import AlbumNotFoundException, SubSonic
@@ -52,12 +53,11 @@ class CastMeCli(cmd.Cmd):
             raise InvalidBackend(default_backend)
 
         self.current_target = targets[default_backend]
-        print("Currently playing on", default_backend)
+        message(f"Currently playing on {default_backend}")
 
     def do_list(self, _line):
         """List all the albums available (alias: l)"""
         cols, _lines = get_terminal_size()
-        print(cols)
         self.columnize(self.subsonic.get_all_albums(), displaywidth=cols)
 
     def emptyline(self):
@@ -67,7 +67,7 @@ class CastMeCli(cmd.Cmd):
         """Switch to another backend. Without argument list the available
         backends. (alias: s)"""
         if not line:
-            print(f"Available targets: {", ".join(self.targets.keys())}")
+            message(f"Available targets: {", ".join(self.targets.keys())}")
             return
 
         self.current_target.stop()
@@ -76,11 +76,11 @@ class CastMeCli(cmd.Cmd):
             if self.songs:
                 self.current_target.force_play()
 
-            print(f"Switch done to {line}")
+            message(f"Switch done to {line}")
         else:
-            print(f"Could not find target {line}")
+            error(f"Could not find target {line}")
 
-    def do_clear(self, line: str):
+    def do_clear(self, _line: str):
         """Clear the queue and stop the music (alias: c)"""
         self.songs.clear()
         self.current_target.stop()
@@ -91,14 +91,14 @@ class CastMeCli(cmd.Cmd):
         """
         if not line:
             for idx, s in enumerate(self.songs):
-                print(f"{1 + idx:2} {s}")
+                message(f"{1 + idx:2} {s}")
             return
         try:
             name, songs = self.subsonic.get_songs_for_album(line)
-            print("Queueing", name)
+            message(f"Queueing {name}")
             self.songs.extend(songs)
         except AlbumNotFoundException as e:
-            print(e)
+            error(str(e))
 
     def do_playpause(self, _line):
         """play/pause the song (alias: pp)"""
@@ -111,7 +111,7 @@ class CastMeCli(cmd.Cmd):
         try:
             self.current_target.force_play()
         except NoSongsToPlayException:
-            print("No songs in the queue")
+            error("No songs in the queue")
 
     def do_volume(self, line: str):
         """Set or change the volume. Valid values are between 0 and 100 (alias: v)
@@ -122,7 +122,7 @@ class CastMeCli(cmd.Cmd):
         try:
             value = float(line) / 100.0
         except ValueError:
-            print("Error converting the value into a number")
+            error("Error converting the value into a number")
             return
 
         if line.startswith("+") or line.startswith("-"):
@@ -163,46 +163,60 @@ def main():
         action="store_true",
     )
     parser.add_argument("--version", action="store_true", help="Print version and exit")
+    parser.add_argument("--debug", action="store_true", help="print debugging messages")
     parser.add_argument("backend", nargs="?")
     args = parser.parse_args()
     config_path = args.config
 
+    if args.debug:
+        enable_debug_mode()
+
     if args.version:
-        print("Version: ", castme_version())
+        message(f"Version: {castme_version()}")
         return
 
-    if args.init:
-        config_path = os.path.expanduser(args.config or "~/.config/castme.toml")
-        if os.path.exists(config_path):
-            print(f"The configuration file {config_path} already exist, bailing out...")
+    try:
+        if args.init:
+            config_path = os.path.expanduser(args.config or "~/.config/castme.toml")
+            if os.path.exists(config_path):
+                error(
+                    f"The configuration file {config_path} already exist, bailing out..."
+                )
+                sys_exit(1)
+            shutil.copy(
+                Path(os.path.dirname(__file__), "assets/castme.toml.template"),
+                config_path,
+            )
+            message(
+                f"Configuration initialized in {config_path}, please edit it before starting castme again"
+            )
+            sys_exit(0)
+
+        config = Config.load(config_path)
+        subsonic = SubSonic(
+            SUBSONIC_APP_ID, config.user, config.password, config.subsonic_server
+        )
+
+        songs_queue = []
+
+        with (
+            chromecast_backend(config, songs_queue) as chromecast,
+            local_backend(config, songs_queue) as local,
+        ):
+
+            cli = CastMeCli(
+                subsonic,
+                {"chromecast": chromecast, "local": local},
+                args.backend or config.default_backend,
+                songs_queue,
+            )
+            cli.cmdloop()
+    except Exception as e:
+        if debug_mode_enabled():
+            raise
+        else:
+            error(e)
             sys_exit(1)
-        shutil.copy(
-            Path(os.path.dirname(__file__), "assets/castme.toml.template"), config_path
-        )
-        print(
-            f"Configuration initialized in {config_path}, please edit it before starting castme again"
-        )
-        sys_exit(0)
-
-    config = Config.load(config_path)
-    subsonic = SubSonic(
-        SUBSONIC_APP_ID, config.user, config.password, config.subsonic_server
-    )
-
-    songs_queue = []
-
-    with (
-        chromecast_backend(config, songs_queue) as chromecast,
-        local_backend(config, songs_queue) as local,
-    ):
-
-        cli = CastMeCli(
-            subsonic,
-            {"chromecast": chromecast, "local": local},
-            args.backend or config.default_backend,
-            songs_queue,
-        )
-        cli.cmdloop()
 
 
 if __name__ == "__main__":

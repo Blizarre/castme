@@ -9,6 +9,7 @@ from pychromecast.controllers.media import (  # type: ignore
 )
 
 from castme.config import Config
+from castme.messages import error
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 
@@ -76,7 +77,7 @@ class MyChromecastListener(MediaStatusListener):
 
     def load_media_failed(self, item: int, error_code: int):
         """Called when load media failed."""
-        print("Error loading media", item, error_code)
+        error(f"Error loading media, error code: {error_code}")
 
 
 def find_chromecast(label) -> Chromecast:
@@ -88,7 +89,6 @@ def find_chromecast(label) -> Chromecast:
 
 
 def play_on_chromecast(song: Song, controller: MediaController):
-    print("Playing song", song)
     metadata = dict(
         # 3 is the magic number for MusicTrackMediaMetadata
         # see https://developers.google.com/cast/docs/media/messages

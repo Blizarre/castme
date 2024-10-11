@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Optional
 
+from castme.messages import message
+
 
 class ConfigNotFoundException(BaseException):
     pass
@@ -20,7 +22,7 @@ class Config:
     @classmethod
     def load(cls, file_path: Optional[PurePath | str] = None) -> "Config":
         def _load(path: PurePath | str):
-            print(f"Loading config from {path}")
+            message(f"Loading config from {path}")
             with open(path, "rb") as fd:
                 data = tomllib.load(fd)
             return cls(**data)

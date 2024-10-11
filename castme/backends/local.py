@@ -76,12 +76,10 @@ def pygame_loop(queue: Queue[Message], songs: List[Song]):  # noqa: PLR0912
     while True:
         try:
             message = queue.get(timeout=0.1)
-            print("Message", message)
             match message.type:
                 case Message.Type.VOLUME_SET:
                     channel.set_volume(message.payload)
                 case Message.Type.VOLUME_DELTA:
-                    print(channel.get_volume())
                     channel.set_volume(channel.get_volume() + message.payload)
                 case Message.Type.STOP:
                     state = State.STOPPED
@@ -89,15 +87,12 @@ def pygame_loop(queue: Queue[Message], songs: List[Song]):  # noqa: PLR0912
                 case Message.Type.PLAY_PAUSE:
                     if state == State.STOPPED:
                         if songs:
-                            print("playing")
                             channel.play(Sound(get_song(songs[0])))
                             state = State.PLAYING
                     elif state == State.PAUSED:
-                        print("Unpausing")
                         channel.unpause()
                         state = State.PLAYING
                     elif state == State.PLAYING:
-                        print("pausing")
                         channel.pause()
                         state = State.PAUSED
                 case Message.Type.FORCE_PLAY:
