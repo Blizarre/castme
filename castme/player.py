@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 
-class NoSongsToPlayException(BaseException):
+class NoSongsToPlayException(Exception):
     pass
 
 

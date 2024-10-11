@@ -17,7 +17,7 @@ from castme.song import Song
 from castme.subsonic import AlbumNotFoundException, SubSonic
 
 
-class InvalidBackend(BaseException):
+class InvalidBackend(Exception):
     def __init__(self, invalid_backend_name: str):
         self.invalid_name = invalid_backend_name
 

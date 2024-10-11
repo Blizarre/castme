@@ -7,7 +7,7 @@ from typing import Optional
 from castme.messages import message
 
 
-class ConfigNotFoundException(BaseException):
+class ConfigNotFoundException(Exception):
     pass
 
 

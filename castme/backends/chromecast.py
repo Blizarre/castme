@@ -55,7 +55,7 @@ class ChromecastBackend(Backend):
         self.stop()
 
 
-class ChromecastNotFoundException(BaseException):
+class ChromecastNotFoundException(Exception):
     def __init__(self, keyword):
         self.keyword = keyword
 
