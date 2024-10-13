@@ -12,9 +12,9 @@ def debug_mode_enabled() -> bool:
     return _DEBUG
 
 
-def debug(msg: str):
+def debug(context: str, msg: str):
     if _DEBUG:
-        cprint(msg, "light_blue")
+        cprint(f"  [{context}] {msg}", "green")
 
 
 def message(msg: str):

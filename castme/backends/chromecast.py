@@ -9,9 +9,14 @@ from pychromecast.controllers.media import (  # type: ignore
 )
 
 from castme.config import Config
+from castme.messages import debug as msg_debug
 from castme.messages import error
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
+
+
+def debug(msg):
+    msg_debug("chromecast", msg)
 
 
 class ChromecastBackend(Backend):
@@ -26,12 +31,14 @@ class ChromecastBackend(Backend):
         )
 
     def force_play(self):
+        debug("Force play")
         if self.songs:
             play_on_chromecast(self.songs[0], self.mediacontroller)
         else:
             raise NoSongsToPlayException()
 
     def playpause(self):
+        debug("playpause")
         if self.mediacontroller.status.player_is_paused:
             self.mediacontroller.play()
         elif self.mediacontroller.status.player_is_idle:
@@ -40,18 +47,22 @@ class ChromecastBackend(Backend):
             self.mediacontroller.pause()
 
     def volume_set(self, value):
+        debug(f"volume set {value}")
         self.chromecast.set_volume(value)
 
     def volume_delta(self, value):
+        debug(f"volume delta {value}")
         if value > 0:
             self.chromecast.volume_up(value)
         else:
             self.chromecast.volume_down(-value)
 
     def stop(self):
+        debug("stop")
         self.chromecast.disconnect()
 
     def close(self):
+        debug("close")
         self.stop()
 
 
@@ -97,6 +108,7 @@ def play_on_chromecast(song: Song, controller: MediaController):
         title=song.title,
         artist=song.artist,
     )
+    debug(f"Playing {song.title} @ {song.url}")
     controller.play_media(
         song.url,
         content_type=song.content_type,
