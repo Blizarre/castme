@@ -96,9 +96,12 @@ class CastMeCli(cmd.Cmd):
                 message(f"{1 + idx:2} {s}")
             return
         try:
+            start_empty = len(self.songs) == 0
             name, songs = self.subsonic.get_songs_for_album(line)
             message(f"Queueing {name}")
             self.songs.extend(songs)
+            if start_empty:
+                self.current_target.force_play()
         except AlbumNotFoundException as e:
             error(str(e))
 
