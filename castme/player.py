@@ -8,11 +8,11 @@ class NoSongsToPlayException(Exception):
 class Backend:
     @abstractmethod
     def force_play(self):
-        pass
+        """Force playing the first song in the queue"""
 
     @abstractmethod
     def playpause(self):
-        pass
+        """Play or pause the music"""
 
     @abstractmethod
     def volume_set(self, value: float):
@@ -24,4 +24,4 @@ class Backend:
 
     @abstractmethod
     def stop(self):
-        pass
+        """Stop the music, regardless of its current status"""

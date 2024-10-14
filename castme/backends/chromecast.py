@@ -91,7 +91,7 @@ class MyChromecastListener(MediaStatusListener):
         error(f"Error loading media, error code: {error_code}")
 
 
-def find_chromecast(label) -> Chromecast:
+def find_chromecast(label: str) -> Chromecast:
     chromecasts, _ = get_listed_chromecasts(friendly_names=[label])
     if not chromecasts:
         raise ChromecastNotFoundException(label)

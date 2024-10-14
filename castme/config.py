@@ -21,7 +21,7 @@ class Config:
 
     @classmethod
     def load(cls, file_path: Optional[PurePath | str] = None) -> "Config":
-        def _load(path: PurePath | str):
+        def _load(path: PurePath | str) -> "Config":
             debug("config", f"Loading config from {path}")
             with open(path, "rb") as fd:
                 data = tomllib.load(fd)

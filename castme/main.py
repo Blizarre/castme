@@ -57,7 +57,7 @@ class CastMeCli(cmd.Cmd):
     def update_prompt(self, label):
         self.prompt = f"[{label}] >> "
 
-    def do_list(self, _line):
+    def do_list(self, _line: str):
         """List all the albums available (alias: l)"""
         cols, _lines = get_terminal_size()
         self.columnize(self.subsonic.get_all_albums(), displaywidth=cols)
@@ -105,11 +105,11 @@ class CastMeCli(cmd.Cmd):
         except AlbumNotFoundException as e:
             error(str(e))
 
-    def do_playpause(self, _line):
+    def do_playpause(self, _line: str):
         """play/pause the song (alias: pp)"""
         self.current_target.playpause()
 
-    def do_next(self, _line):
+    def do_next(self, _line: str):
         """Skip to the next song (alias: n)"""
         if self.songs:
             self.songs.pop(0)
@@ -135,7 +135,7 @@ class CastMeCli(cmd.Cmd):
         else:
             self.current_target.volume_set(value)
 
-    def do_quit(self, _line):
+    def do_quit(self, _line: str):
         """Exit the application (alias: x or Ctrl-D)"""
         self.current_target.stop()
         return True

@@ -34,7 +34,9 @@ class SubSonic:
         self.password = password
         self.server_prefix = server_prefix
 
-    def make_sonic_url(self, verb: str, **kwargs) -> Tuple[str, Dict[str, Any]]:
+    def make_sonic_url(
+        self, verb: str, **kwargs: str | int
+    ) -> Tuple[str, Dict[str, Any]]:
         salt = "".join(random.choices(string.ascii_letters + string.digits, k=10))
         token = md5((self.password + salt).encode()).hexdigest()
         parameters = kwargs | {
@@ -48,7 +50,7 @@ class SubSonic:
 
         return f"{self.server_prefix}/rest/{verb}", parameters
 
-    def call_sonic(self, verb: str, **kwargs):
+    def call_sonic(self, verb: str, **kwargs: str | int):
         url, parameters = self.make_sonic_url(verb, **kwargs)
         req = requests.get(url, params=parameters, timeout=20)
         req.raise_for_status()
