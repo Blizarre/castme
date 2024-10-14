@@ -59,7 +59,7 @@ class ChromecastBackend(Backend):
 
     def stop(self):
         debug("stop")
-        self.chromecast.disconnect()
+        self.mediacontroller.stop()
 
     def close(self):
         debug("close")
