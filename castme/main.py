@@ -72,8 +72,8 @@ class CastMeCli(cmd.Cmd):
             message(f"Available targets: {", ".join(self.targets.keys())}")
             return
 
-        self.current_target.stop()
         if line in self.targets:
+            self.current_target.stop()
             self.current_target = self.targets[line]
             if self.songs:
                 self.current_target.force_play()
