@@ -11,13 +11,14 @@ import requests as r
 # Feeling bad about it, but pygame always display a welcome
 # message which is completely out of place on a CLI music player.
 with redirect_stdout(None):
-    from pygame import event
+    from pygame import event, NOEVENT
     from pygame.locals import USEREVENT
     from pygame.display import init as display_init
-    from pygame.mixer import Channel, Sound
+    from pygame.mixer import music
     from pygame.mixer import init as mixer_init
 
 from castme.config import Config
+from castme.messages import debug as msg_debug
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 
@@ -28,6 +29,10 @@ def get_song(song: Song) -> BinaryIO:
     response = r.get(song.url, timeout=10)
     response.raise_for_status()
     return BytesIO(response.content)
+
+
+def debug(msg):
+    msg_debug("local", msg)
 
 
 @dataclass
@@ -68,57 +73,69 @@ class State(Enum):
     STOPPED = 3
 
 
+def play_next(songs: List[Song]) -> bool:
+    if songs:
+        debug(f"Playing {songs[0].title}")
+        music.load(get_song(songs[0]))
+        music.play()
+        return True
+    return False
+
+
 def pygame_loop(queue: Queue[Message], songs: List[Song]):  # noqa: PLR0912
     """Pygame is not thread-safe. All the api calls needs to be done on the
     same thread, expecially the event management code."""
     mixer_init()
     display_init()
-    channel = Channel(0)
-    channel.set_endevent(STOP_EVENT)
+    music.set_endevent(STOP_EVENT)
 
     state = State.STOPPED
 
     while True:
         try:
             message = queue.get(timeout=0.1)
+            debug(f"loop - Received message {message}")
             match message.type:
                 case Message.Type.VOLUME_SET:
-                    channel.set_volume(message.payload)
+                    music.set_volume(message.payload)
                 case Message.Type.VOLUME_DELTA:
-                    channel.set_volume(channel.get_volume() + message.payload)
+                    music.set_volume(music.get_volume() + message.payload)
                 case Message.Type.STOP:
                     state = State.STOPPED
-                    channel.stop()
+                    music.stop()
                 case Message.Type.PLAY_PAUSE:
                     if state == State.STOPPED:
-                        if songs:
-                            channel.play(Sound(get_song(songs[0])))
+                        if play_next(songs):
                             state = State.PLAYING
                     elif state == State.PAUSED:
-                        channel.unpause()
+                        music.unpause()
                         state = State.PLAYING
                     elif state == State.PLAYING:
-                        channel.pause()
+                        music.pause()
                         state = State.PAUSED
                 case Message.Type.FORCE_PLAY:
-                    if songs:
-                        channel.play(Sound(get_song(songs[0])))
+                    if play_next(songs):
                         state = State.PLAYING
                 case Message.Type.EXIT:
                     return
         except Empty:
             pass
 
-        pygame_event = event.wait(100)
-        if pygame_event == STOP_EVENT:
-            if state == State.PLAYING:
-                # The channel have stopped _and_ we are still playing. It is time
-                # to move on to the next song
-                songs.pop(0)
-                if songs:
-                    channel.play(Sound(get_song(songs[0])))
-                else:
-                    state = State.STOPPED
+        if (pygame_event := event.poll()).type != NOEVENT:
+            debug(f"Event: {pygame_event}")
+            if pygame_event.type == STOP_EVENT:
+                if state == State.PLAYING:
+                    # The channel have stopped _and_ we are now playing the queued song. It is time
+                    # to move on to the next song
+                    if songs:
+                        songs.pop(0)
+
+                    if songs and play_next(songs):
+                        debug("Channel was not busy, played the next song")
+                        state = State.PLAYING
+                    else:
+                        debug("Channel was not busy, nothing to play")
+                        state = State.STOPPED
 
 
 class LocalBackendImpl(Backend):
