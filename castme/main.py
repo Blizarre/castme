@@ -97,7 +97,7 @@ class CastMeCli(cmd.Cmd):
         """Switch to another backend. Without argument list the available
         backends. (alias: s)"""
         if not line:
-            message(f"Available targets: {", ".join(self.targets.keys())}")
+            message(f"Available targets: {', '.join(self.targets.keys())}")
             return
 
         if line in self.targets:
