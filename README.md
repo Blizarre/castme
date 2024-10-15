@@ -18,7 +18,7 @@ Just create the configuration file using `--init` and edit the content:
 Configuration initialized in /home/blizarre/.config/castme.toml, please edit it before starting castme again
 ```
 
-Castme will look for the `castme.toml` file in `/etc` or in the current directory as well. use `--config` in conjunction with `--init` to set the location of the configuration file.
+Castme will automatically look for the `castme.toml` file in `/etc` or in the current directory as well. use `--config` in conjunction with `--init` to set the location of the configuration file.
 
 ### Usage
 
@@ -33,7 +33,7 @@ Brandenburg Concertos 5 and 6 - Violin Concerto     Harold en Italie
 ```
 - Play an album based on fuzzy search
 ```bash
-[chromecast] >> queue Harold enI
+[chromecast] >> queue Harld enI
 Queueing Harold en Italie
 ```
 - Display the queue
@@ -44,7 +44,7 @@ Queueing Harold en Italie
  3 Serenade of an Abruzzian highlander (Allegro assai) / Harold en Italie by Hector Berlioz
  4 The Robbers' orgies (Allegro frenetico) / Harold en Italie by Hector Berlioz
  ```
-- Reduce the volume to 50%, then increase by 20%
+- Set the volume to 50%, then increase by 20%
 ```bash
 [chromecast] >> volume 50
 [chromecast] >> volume +20
@@ -60,7 +60,7 @@ Queueing Harold en Italie
 Available targets: chromecast, local
 [chromecast] >> switch local
 ```
-- Skip the current song ans display the new queue
+- Skip the current song and display the new queue
 ```bash
 [local] >> next
 [local] >> q
@@ -74,6 +74,7 @@ Available targets: chromecast, local
 ```
 
 commands: `help  list (l),  next (n),  play (p),  playpause (pp),  queue (q),  quit (x),  volume (v), clear (c)`.
+
 Aliases are defined for the most common commands (in parenthesis).
 
 
