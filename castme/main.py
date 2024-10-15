@@ -54,7 +54,7 @@ class CastMeCli(cmd.Cmd):
         message(f"Currently playing on {default_backend}")
         self.update_prompt(default_backend)
 
-    def update_prompt(self, label):
+    def update_prompt(self, label: str):
         self.prompt = f"[{label}] >> "
 
     def do_list(self, _line: str):
@@ -202,7 +202,7 @@ def main():
             SUBSONIC_APP_ID, config.user, config.password, config.subsonic_server
         )
 
-        songs_queue = []
+        songs_queue: List[Song] = []
 
         with (
             chromecast_backend(config, songs_queue) as chromecast,
@@ -220,7 +220,7 @@ def main():
         if debug_mode_enabled():
             raise
         else:
-            error(e)
+            error(str(e))
             sys_exit(1)
 
 

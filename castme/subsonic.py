@@ -11,7 +11,7 @@ from castme.song import Song
 
 
 class AlbumNotFoundException(Exception):
-    def __init__(self, keyword):
+    def __init__(self, keyword: str):
         self.keyword = keyword
 
     def __str__(self):

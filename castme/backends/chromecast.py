@@ -15,7 +15,7 @@ from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 
 
-def debug(msg):
+def debug(msg: str):
     msg_debug("chromecast", msg)
 
 
@@ -46,11 +46,11 @@ class ChromecastBackend(Backend):
         elif self.mediacontroller.status.player_is_playing:
             self.mediacontroller.pause()
 
-    def volume_set(self, value):
+    def volume_set(self, value: float):
         debug(f"volume set {value}")
         self.chromecast.set_volume(value)
 
-    def volume_delta(self, value):
+    def volume_delta(self, value: float):
         debug(f"volume delta {value}")
         if value > 0:
             self.chromecast.volume_up(value)
@@ -67,7 +67,7 @@ class ChromecastBackend(Backend):
 
 
 class ChromecastNotFoundException(Exception):
-    def __init__(self, keyword):
+    def __init__(self, keyword: str):
         self.keyword = keyword
 
     def __str__(self):
