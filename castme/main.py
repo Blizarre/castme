@@ -44,6 +44,7 @@ class CastMeCli(cmd.Cmd):
         songs: List[Song],
     ):
         super().__init__()
+        self.min_column_width = 50
         self.subsonic = subsonic
         self.songs = songs
         self.targets = targets
@@ -59,8 +60,35 @@ class CastMeCli(cmd.Cmd):
 
     def do_list(self, _line: str):
         """List all the albums available (alias: l)"""
-        cols, _lines = get_terminal_size()
-        self.columnize(self.subsonic.get_all_albums(), displaywidth=cols)
+        term_cols, term_rows = get_terminal_size()
+        albums = self.subsonic.get_all_albums()
+        number_of_columns = term_cols // self.min_column_width or 1
+        # We can get some extra chars by dispatching the remainder characters to
+        # each column
+        column_width = (
+            self.min_column_width
+            + (term_cols % self.min_column_width) // number_of_columns
+        )
+        text_width_fmt = str(column_width - 2)  # 2 chars of padding
+        # We want to truncate the string to the text width
+        format_string_album = "{:" + text_width_fmt + "." + text_width_fmt + "}"
+
+        while albums:
+            lines_printed = 1
+            # We print line by line
+            while albums and lines_printed < term_rows:
+                displayed_albums = albums[:number_of_columns]
+                albums = albums[number_of_columns:]
+                # This line concatenate N format string and then format the result with N album names
+                message(
+                    "".join(([format_string_album] * len(displayed_albums))).format(
+                        *displayed_albums
+                    )
+                )
+                lines_printed += 1
+
+            if albums:
+                input(" .... Press <Enter> to continue ....")
 
     def emptyline(self):
         pass
