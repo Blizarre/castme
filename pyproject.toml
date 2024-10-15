@@ -23,18 +23,18 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-pychromecast = "*"
-zeroconf = "*"
+pychromecast = "^13.1.0"
+zeroconf = "^0.135.0"
 python = ">=3.10,<4.0"
 pygame = "^2.6.1"
 types-requests = "^2.32.0.20240914"
-mypy = "^1.11.2"
 termcolor = "^2.5.0"
 
 [tool.poetry.dev-dependencies]
 black = "*"
 ruff = "*"
 isort = "*"
+mypy = "*"
 
 [tool.isort]
 profile = "black"
