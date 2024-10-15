@@ -59,7 +59,8 @@ class ChromecastBackend(Backend):
 
     def stop(self):
         debug("stop")
-        self.mediacontroller.stop()
+        if self.mediacontroller.is_active:
+            self.mediacontroller.stop()
 
     def close(self):
         debug("close")
