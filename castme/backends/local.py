@@ -5,8 +5,10 @@ from io import BytesIO
 from queue import Empty, Queue
 from threading import Thread
 from typing import Any, BinaryIO, Generator, List
+from urllib.error import URLError
 
 import requests as r
+from requests.exceptions import RequestException
 
 # Feeling bad about it, but pygame always display a welcome
 # message which is completely out of place on a CLI music player.
@@ -19,6 +21,7 @@ with redirect_stdout(None):
 
 from castme.config import Config
 from castme.messages import debug as msg_debug
+from castme.messages import error
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
 
@@ -74,11 +77,19 @@ class State(Enum):
 
 
 def play_next(songs: List[Song]) -> bool:
-    if songs:
-        debug(f"Playing {songs[0].title}")
-        music.load(get_song(songs[0]))
-        music.play()
-        return True
+    """returns True if it was successful, False otherwise.
+    It is not great to not provide feedback upstream, but realistically
+    there is nothing that it can do anyway for now. Good candidate for a
+    refactoring.
+    """
+    try:
+        if songs:
+            debug(f"Playing {songs[0].title}")
+            music.load(get_song(songs[0]))
+            music.play()
+            return True
+    except (RequestException, URLError) as e:
+        error(str(e))
     return False
 
 
