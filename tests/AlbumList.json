@@ -1,0 +1,23 @@
+{
+    "album": [
+        {
+            "id": "11",
+            "parent": "1",
+            "title": "Arrival",
+            "artist": "ABBA",
+            "isDir": "true",
+            "coverArt": "22",
+            "userRating": "4",
+            "averageRating": "4.5"
+        },
+        {
+            "id": "11053",
+            "parent": "1",
+            "title": "High Voltage",
+            "artist": "ABBA",
+            "isDir": "true",
+            "coverArt": "23",
+            "averageRating": "4.4"
+        }
+    ]
+}

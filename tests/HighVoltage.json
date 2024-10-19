@@ -1,0 +1,52 @@
+{
+    "id": "11053",
+    "name": "High Voltage",
+    "coverArt": "al-11053",
+    "songCount": "8",
+    "created": "2004-11-27T20:23:32",
+    "duration": "2414",
+    "artist": "AC/DC",
+    "artistId": "5432",
+    "song": [
+        {
+            "id": "71463",
+            "parent": "71381",
+            "title": "The Jack",
+            "album": "High Voltage",
+            "artist": "AC/DC",
+            "isDir": "false",
+            "coverArt": "71381",
+            "created": "2004-11-08T23:36:11",
+            "duration": "352",
+            "bitRate": "128",
+            "size": "5624132",
+            "suffix": "mp3",
+            "contentType": "audio/mpeg",
+            "isVideo": "false",
+            "path": "ACDC/High voltage/ACDC - The Jack.mp3",
+            "albumId": "11053",
+            "artistId": "5432",
+            "type": "music"
+        },
+        {
+            "id": "71464",
+            "parent": "71381",
+            "title": "Tnt",
+            "album": "High Voltage",
+            "artist": "AC/DC",
+            "isDir": "false",
+            "coverArt": "71381",
+            "created": "2004-11-08T23:36:11",
+            "duration": "215",
+            "bitRate": "128",
+            "size": "3433798",
+            "suffix": "mp3",
+            "contentType": "audio/mpeg",
+            "isVideo": "false",
+            "path": "ACDC/High voltage/ACDC - TNT.mp3",
+            "albumId": "11053",
+            "artistId": "5432",
+            "type": "music"
+        }
+    ]
+}
