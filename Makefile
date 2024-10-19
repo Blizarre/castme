@@ -1,5 +1,7 @@
 .PHONY: lint env
 
+VERSION?=$(error Please set the VERSION flag)
+
 lint:
 	poetry run isort --check .
 	poetry run black --check .
@@ -14,3 +16,10 @@ dev:
 
 env:
 	poetry install
+
+release:
+	poetry version "$(VERSION)"
+	git add pyproject.toml
+	git commit -m "Bumping version $(VERSION)"
+	git tag -a "$(VERSION)" -m "Version bump to $(VERSION)"
+	git push --follow-tags
