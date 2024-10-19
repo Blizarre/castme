@@ -35,6 +35,7 @@ black = "*"
 ruff = "*"
 isort = "*"
 mypy = "*"
+pytest = "*"
 
 [tool.isort]
 profile = "black"

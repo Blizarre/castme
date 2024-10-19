@@ -1,21 +1,24 @@
-.PHONY: lint env
+.PHONY: lint dev env test release
 
 VERSION?=$(error Please set the VERSION flag)
 
-lint:
+lint: test
 	poetry run isort --check .
 	poetry run black --check .
 	poetry run ruff check .
 	poetry run mypy . --check-untyped-defs
 
-dev:
+env:
+	poetry install
+
+dev: test
 	poetry run isort .
 	poetry run black .
 	poetry run ruff check .
 	poetry run mypy . --check-untyped-defs
 
-env:
-	poetry install
+test:
+	poetry run pytest -vv
 
 release:
 	poetry version "$(VERSION)"
