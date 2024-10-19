@@ -58,6 +58,9 @@ class CastMeCli(cmd.Cmd):
     def update_prompt(self, label: str):
         self.prompt = f"[{label}] >> "
 
+    def do_rewind(self, _list: str):
+        self.current_target.rewind()
+
     def do_list(self, _line: str):
         """List all the albums available (alias: l)"""
         term_cols, term_rows = get_terminal_size()
@@ -179,6 +182,7 @@ class CastMeCli(cmd.Cmd):
             "c": "clear",
             "x": "quit",
             "s": "switch",
+            "r": "rewind",
             "EOF": "quit",  # Set by Cmd itself on Ctrl-C
         }
         if potential_alias in aliases:

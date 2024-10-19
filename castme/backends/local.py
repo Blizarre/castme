@@ -162,17 +162,22 @@ class LocalBackendImpl(Backend):
         )
         self.pygame_thread.start()
 
-    def close(self):
-        self.queue.put(Message.exit())
-        self.pygame_thread.join()
-
-    def playpause(self):
-        self.queue.put(Message.playpause())
-
     def force_play(self):
         if not self.songs:
             raise NoSongsToPlayException()
         self.queue.put(Message.force_play())
+
+    def rewind(self):
+        if not self.songs:
+            raise NoSongsToPlayException()
+        self.queue.put(Message.force_play())
+
+    def playpause(self):
+        self.queue.put(Message.playpause())
+
+    def close(self):
+        self.queue.put(Message.exit())
+        self.pygame_thread.join()
 
     def volume_set(self, value: float):
         self.queue.put(Message(Message.Type.VOLUME_SET, value))

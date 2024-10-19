@@ -37,6 +37,10 @@ class ChromecastBackend(Backend):
         else:
             raise NoSongsToPlayException()
 
+    def rewind(self):
+        debug("Rewind")
+        self.force_play()
+
     def playpause(self):
         debug("playpause")
         if self.mediacontroller.status.player_is_paused:

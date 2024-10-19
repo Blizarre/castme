@@ -73,7 +73,7 @@ Available targets: chromecast, local
 >> quit
 ```
 
-commands: `help  list (l),  next (n),  play (p),  playpause (pp),  queue (q),  quit (x),  volume (v), clear (c)`.
+commands: `help,  list (l),  next (n), rewind (r),  play (p),  playpause (pp),  queue (q),  quit (x),  volume (v),  clear (c)`.
 
 Aliases are defined for the most common commands (in parenthesis).
 

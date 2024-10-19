@@ -11,6 +11,10 @@ class Backend:
         """Force playing the first song in the queue"""
 
     @abstractmethod
+    def rewind(self):
+        """Rewind the current song"""
+
+    @abstractmethod
     def playpause(self):
         """Play or pause the music"""
 
