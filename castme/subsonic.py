@@ -7,7 +7,12 @@ from urllib.parse import urlencode
 
 import requests
 
+from castme.messages import debug as msg_debug
 from castme.song import Song
+
+
+def debug(msg):
+    msg_debug("sonic", msg)
 
 
 class AlbumNotFoundException(Exception):
@@ -60,13 +65,14 @@ class SubSonic:
         albums = self.call_sonic("getAlbumList", type="alphabeticalByName", size=500)[
             "subsonic-response"
         ]["albumList"]["album"]
-        return [a["album"] for a in albums]
+        return [a["title"] for a in albums]
 
     def get_songs_for_album(self, album_name: str) -> Tuple[str, List[Song]]:
         output = self.call_sonic("getAlbumList", type="alphabeticalByName", size=500)[
             "subsonic-response"
         ]
         albums = output["albumList"]["album"]
+        debug(f"Found {len(albums)}")
         songs = []
         closest = difflib.get_close_matches(
             album_name,
@@ -74,14 +80,17 @@ class SubSonic:
             # dissimilar string length well. We essentially assume that the user
             # was lazy and just typed the beginning of the album name, which works
             # actually really well. It is a good enough heuristic for now.
-            [a["album"][: len(album_name) + 3] for a in albums],
+            [a["title"][: len(album_name) + 3] for a in albums],
             1,
         )
         if not closest:
             raise AlbumNotFoundException(album_name)
 
+        debug(f"Closest match {closest}")
+
         for album in albums:
-            if album["album"][: len(album_name) + 3] == closest[0]:
+            debug(f'Looking at {album["title"]}')
+            if album["title"][: len(album_name) + 3] == closest[0]:
                 cover_url, cover_params = self.make_sonic_url(
                     "getCoverArt", id=album["coverArt"]
                 )
@@ -101,6 +110,6 @@ class SubSonic:
                             cover_url + "?" + urlencode(cover_params),
                         )
                     )
-                return album["album"], songs
+                return album["title"], songs
 
         raise AlbumNotFoundException(album_name)
