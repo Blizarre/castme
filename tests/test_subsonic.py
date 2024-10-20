@@ -3,17 +3,22 @@ import socketserver
 from hashlib import md5
 from http.server import BaseHTTPRequestHandler
 from threading import Thread
+from typing import Any, Dict
 from urllib.parse import parse_qs, urlparse
 
 import pytest
 from pytest import fixture
 
 from castme.messages import enable_debug_mode
-from castme.subsonic import AlbumNotFoundException, SubSonic
+from castme.subsonic import AlbumNotFoundException, SubSonic, SubsonicApiError
 
 PORT = 4040
 VERSION = "1.16.1"
 CLIENT_NAME = "tests"
+USER = "castme"
+PWD = "pwd123"
+
+FAILED_AUTH_CODE = 40
 
 
 @fixture(scope="module", autouse=True)
@@ -21,8 +26,10 @@ def enable_debug():
     enable_debug_mode()
 
 
-def create_response(status, **data):
-    response = {"subsonic-response": {"status": status, "version": VERSION, **data}}
+def create_response(response_status, **data):
+    response = {
+        "subsonic-response": {"status": response_status, "version": VERSION, **data}
+    }
     return json.dumps(response).encode("utf-8")
 
 
@@ -31,23 +38,45 @@ class MockSubsonicServer(socketserver.TCPServer):
 
 
 class MockSubsonicHandler(BaseHTTPRequestHandler):
-    def okResponse(self, data: bytes):
+    def send_api_response(self, data: bytes):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(data)
 
+    @staticmethod
+    def check_auth(params: Dict[str, Any]):
+        return params["u"] == [USER] and params["t"] == [
+            md5((PWD + params["s"][0]).encode("utf-8")).hexdigest()
+        ]
+
     def do_GET(self):
         parsed_path = urlparse(self.path)
         params = parse_qs(parsed_path.query)
 
-        if parsed_path.path == "/rest/ping":
-            self.okResponse(create_response("ok"))
+        if not self.check_auth(params):
+            self.send_api_response(
+                create_response(
+                    "failed",
+                    status="failed",
+                    version="1.16.1",
+                    type="navidrome",
+                    serverVersion="0.53.3 (13af8ed4)",
+                    openSubsonic=True,
+                    error={
+                        "code": FAILED_AUTH_CODE,
+                        "message": "Wrong username or password",
+                    },
+                )
+            )
+
+        elif parsed_path.path == "/rest/ping":
+            self.send_api_response(create_response("ok"))
 
         elif parsed_path.path == "/rest/getAlbumList":
             with open("tests/AlbumList.json", "rb") as fd:
                 albums = json.load(fd)
-            self.okResponse(create_response("ok", albumList=albums))
+            self.send_api_response(create_response("ok", albumList=albums))
 
         elif parsed_path.path == "/rest/getAlbum":
             with open("tests/HighVoltage.json", "rb") as fd:
@@ -55,10 +84,10 @@ class MockSubsonicHandler(BaseHTTPRequestHandler):
             if params["id"][0] != album["id"]:
                 self.send_error(404, "Not Found")
                 return
-            self.okResponse(create_response("ok", album=album))
+            self.send_api_response(create_response("ok", album=album))
 
         elif parsed_path.path == "/rest/echo":
-            self.okResponse(create_response("ok", params=params))
+            self.send_api_response(create_response("ok", params=params))
 
         else:
             self.send_error(404, "Not Found")
@@ -76,7 +105,12 @@ def mock_server():
 
 @fixture
 def subsonic(mock_server):
-    return SubSonic(CLIENT_NAME, "castme", "pwd", f"http://localhost:{mock_server}")
+    return SubSonic(CLIENT_NAME, USER, PWD, f"http://localhost:{mock_server}")
+
+
+@fixture
+def subsonic_wrong_pwd(mock_server):
+    return SubSonic(CLIENT_NAME, USER, "badpassword", f"http://localhost:{mock_server}")
 
 
 def test_call_sonic_no_args(subsonic: SubSonic):
@@ -95,9 +129,6 @@ def test_check_sonic_auth(subsonic: SubSonic):
     assert params["v"] == [VERSION]
     assert params["c"] == [CLIENT_NAME]
     seed1 = params["s"]
-    assert params["t"] == [
-        md5((subsonic.password + params["s"][0]).encode("utf-8")).hexdigest()
-    ]
 
     # The seed is generated dynamically. We check that it is different each time
     result = subsonic.call_sonic("echo")
@@ -107,6 +138,16 @@ def test_check_sonic_auth(subsonic: SubSonic):
 
 def test_get_all_albums(subsonic: SubSonic):
     assert subsonic.get_all_albums() == ["Arrival", "High Voltage"]
+
+
+def test_wrong_credentials(subsonic_wrong_pwd: SubSonic):
+    with pytest.raises(SubsonicApiError) as e:
+        subsonic_wrong_pwd.get_all_albums()
+    assert e.value.code == FAILED_AUTH_CODE
+
+    with pytest.raises(SubsonicApiError) as e:
+        subsonic_wrong_pwd.get_songs_for_album("aaa")
+    assert e.value.code == FAILED_AUTH_CODE
 
 
 @pytest.mark.parametrize(
