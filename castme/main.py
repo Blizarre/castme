@@ -95,6 +95,7 @@ class CastMeCli(cmd.Cmd):
                     input(" .... Press <Enter> to continue ....")
         except SubsonicApiError as e:
             error(str(e))
+
     def emptyline(self):
         pass
 
