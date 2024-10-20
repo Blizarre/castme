@@ -23,6 +23,15 @@ class AlbumNotFoundException(Exception):
         return f"Album not found with keyword: {self.keyword}"
 
 
+class SubsonicApiError(Exception):
+    def __init__(self, message: str, code: int):
+        self.message = message
+        self.code = code
+
+    def __str__(self):
+        return f"Error {self.code} when calling the Subsonic Server: {self.message}"
+
+
 SUBSONIC_SUPPORTED_VERSION = "1.16.1"
 
 
@@ -59,6 +68,10 @@ class SubSonic:
         url, parameters = self.make_sonic_url(verb, **kwargs)
         req = requests.get(url, params=parameters, timeout=20)
         req.raise_for_status()
+        response = req.json()["subsonic-response"]
+        if response["status"] == "failed":
+            error_data = response["error"]
+            raise SubsonicApiError(error_data["message"], error_data["code"])
         return req.json()
 
     def get_all_albums(self) -> List[str]:

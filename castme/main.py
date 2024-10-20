@@ -14,7 +14,7 @@ from castme.config import Config
 from castme.messages import debug_mode_enabled, enable_debug_mode, error, message
 from castme.player import Backend, NoSongsToPlayException
 from castme.song import Song
-from castme.subsonic import AlbumNotFoundException, SubSonic
+from castme.subsonic import AlbumNotFoundException, SubSonic, SubsonicApiError
 
 
 class InvalidBackend(Exception):
@@ -63,36 +63,38 @@ class CastMeCli(cmd.Cmd):
 
     def do_list(self, _line: str):
         """List all the albums available (alias: l)"""
-        term_cols, term_rows = get_terminal_size()
-        albums = self.subsonic.get_all_albums()
-        number_of_columns = term_cols // self.min_column_width or 1
-        # We can get some extra chars by dispatching the remainder characters to
-        # each column
-        column_width = (
-            self.min_column_width
-            + (term_cols % self.min_column_width) // number_of_columns
-        )
-        text_width_fmt = str(column_width - 2)  # 2 chars of padding
-        # We want to truncate the string to the text width
-        format_string_album = "{:" + text_width_fmt + "." + text_width_fmt + "}"
+        try:
+            term_cols, term_rows = get_terminal_size()
+            albums = self.subsonic.get_all_albums()
+            number_of_columns = term_cols // self.min_column_width or 1
+            # We can get some extra chars by dispatching the remainder characters to
+            # each column
+            column_width = (
+                self.min_column_width
+                + (term_cols % self.min_column_width) // number_of_columns
+            )
+            text_width_fmt = str(column_width - 2)  # 2 chars of padding
+            # We want to truncate the string to the text width
+            format_string_album = "{:" + text_width_fmt + "." + text_width_fmt + "}"
 
-        while albums:
-            lines_printed = 1
-            # We print line by line
-            while albums and lines_printed < term_rows:
-                displayed_albums = albums[:number_of_columns]
-                albums = albums[number_of_columns:]
-                # This line concatenate N format string and then format the result with N album names
-                message(
-                    "".join(([format_string_album] * len(displayed_albums))).format(
-                        *displayed_albums
+            while albums:
+                lines_printed = 1
+                # We print line by line
+                while albums and lines_printed < term_rows:
+                    displayed_albums = albums[:number_of_columns]
+                    albums = albums[number_of_columns:]
+                    # This line concatenate N format string and then format the result with N album names
+                    message(
+                        "".join(([format_string_album] * len(displayed_albums))).format(
+                            *displayed_albums
+                        )
                     )
-                )
-                lines_printed += 1
+                    lines_printed += 1
 
-            if albums:
-                input(" .... Press <Enter> to continue ....")
-
+                if albums:
+                    input(" .... Press <Enter> to continue ....")
+        except SubsonicApiError as e:
+            error(str(e))
     def emptyline(self):
         pass
 
@@ -133,7 +135,7 @@ class CastMeCli(cmd.Cmd):
             self.songs.extend(songs)
             if start_empty:
                 self.current_target.force_play()
-        except AlbumNotFoundException as e:
+        except (SubsonicApiError, AlbumNotFoundException) as e:
             error(str(e))
 
     def do_playpause(self, _line: str):
