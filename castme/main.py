@@ -186,7 +186,7 @@ class CastMeCli(cmd.Cmd):
             "x": "quit",
             "s": "switch",
             "r": "rewind",
-            "EOF": "quit",  # Set by Cmd itself on Ctrl-C
+            "EOF": "quit",  # Set by Cmd itself on Ctrl-D
         }
         if potential_alias in aliases:
             return line.replace(potential_alias, aliases[potential_alias], 1)
