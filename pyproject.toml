@@ -18,6 +18,9 @@ keywords = ["subsonic", "chromecast"]
 [tool.poetry.scripts]
 castme = "castme.main:main"
 
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.393"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
@@ -36,6 +39,7 @@ ruff = "*"
 isort = "*"
 mypy = "*"
 pytest = "*"
+pyright = "*"
 
 [tool.isort]
 profile = "black"

@@ -8,8 +8,14 @@ lint: test
 	poetry run ruff check .
 	poetry run mypy . --check-untyped-defs
 
-env:
-	poetry install
+env: env_installed
+
+env_installed: poetry.lock
+	poetry install --with=dev
+	touch env_installed
+
+poetry.lock: pyproject.toml
+	poetry lock --no-update
 
 dev: test
 	poetry run isort .
@@ -17,7 +23,7 @@ dev: test
 	poetry run ruff check .
 	poetry run mypy . --check-untyped-defs
 
-test:
+test: env
 	poetry run pytest -vv
 
 release:
