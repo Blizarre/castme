@@ -27,7 +27,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 pychromecast = "^13.1.0"
-zeroconf = ">=0.135,<0.137"
+zeroconf = ">=0.135,<0.144"
 python = ">=3.10,<4.0"
 pygame = "^2.6.1"
 types-requests = "^2.32.0.20240914"
