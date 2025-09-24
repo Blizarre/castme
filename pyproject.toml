@@ -20,6 +20,11 @@ castme = "castme.main:main"
 
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.393"
+black = "*"
+ruff = "*"
+isort = "*"
+mypy = "*"
+pytest = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -32,14 +37,6 @@ python = ">=3.10,<4.0"
 pygame = "^2.6.1"
 types-requests = "^2.32.0.20240914"
 termcolor = "^2.5.0"
-
-[tool.poetry.dev-dependencies]
-black = "*"
-ruff = "*"
-isort = "*"
-mypy = "*"
-pytest = "*"
-pyright = "*"
 
 [tool.isort]
 profile = "black"
